@@ -42,11 +42,5 @@ idf.py set-target esp32s3
 idf.py menuconfig  # optional, generates sdkconfig
 ```
 
-Then build and flash the project with:
 
-```bash
-idf.py build
-idf.py flash
-```
-
-After reset, the application continuously prints the measured distance to the serial console.
+Build the project with `idf.py build` and flash it with `idf.py flash`. After reset, the application continuously prints the measured distance to the serial console.
