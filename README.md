@@ -30,3 +30,9 @@ Below is short explanation of remaining files in the project folder.
 ```
 Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
 They are not used or needed when building with CMake and idf.py.
+
+## VL53L0X Example
+
+This project demonstrates how to read distance measurements from a VL53L0X sensor using an ESP32-S3. The sensor is connected via the I2C bus. Default pins are GPIO18 (SDA) and GPIO19 (SCL). The `vl53l0x` component initializes the sensor and provides a helper function to retrieve the distance in millimetres.
+
+Build the project with `idf.py build` and flash it with `idf.py flash`. After reset, the application continuously prints the measured distance to the serial console.
