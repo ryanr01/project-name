@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/i2c_master.h"
+#include "driver/i2c.h"
+#include "driver/gpio.h"
 #include "esp_log.h"
 #include "vl53l0x.h"
 
@@ -12,35 +13,27 @@
 
 static const char *TAG = "MAIN";
 
-static void i2c_master_init(i2c_master_bus_handle_t *bus, i2c_master_dev_handle_t *dev)
+static void i2c_master_init(void)
 {
-    i2c_master_bus_config_t bus_config = {
-        .i2c_port = I2C_MASTER_PORT,
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_MASTER_SDA_IO,
         .scl_io_num = I2C_MASTER_SCL_IO,
-        .clk_source = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt = 7,
-        .flags = { .enable_internal_pullup = true },
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master.clk_speed = I2C_MASTER_FREQ_HZ,
     };
-    ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, bus));
-
-    i2c_device_config_t dev_config = {
-        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = VL53L0X_I2C_ADDR,
-        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
-    };
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(*bus, &dev_config, dev));
+    ESP_ERROR_CHECK(i2c_param_config(I2C_MASTER_PORT, &conf));
+    ESP_ERROR_CHECK(i2c_driver_install(I2C_MASTER_PORT, conf.mode, 0, 0, 0));
 }
 
 void app_main(void)
 {
-    i2c_master_bus_handle_t bus;
-    i2c_master_dev_handle_t dev;
-    i2c_master_init(&bus, &dev);
-    ESP_ERROR_CHECK(vl53l0x_init(dev));
+    i2c_master_init();
+    ESP_ERROR_CHECK(vl53l0x_init(I2C_MASTER_PORT));
 
     while (1) {
-        int dist = vl53l0x_read_range_mm(dev);
+        int dist = vl53l0x_read_range_mm(I2C_MASTER_PORT);
         if (dist >= 0) {
             ESP_LOGI(TAG, "Distance: %d mm", dist);
         } else {
