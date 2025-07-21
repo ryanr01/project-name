@@ -1,8 +1,10 @@
 #include "vl53l0x.h"
 #include <string.h>
 #include <stdlib.h>
+#include "esp_log.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "sdkconfig.h"
 
 static esp_err_t write_reg(i2c_master_dev_handle_t dev, uint16_t reg, uint8_t val)
 {
@@ -73,7 +75,7 @@ int vl53l0x_read_range_mm(i2c_master_dev_handle_t dev)
         if (status & 0x07) {
             break;
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(10);
     }
     if (!(status & 0x07)) {
         return -1;

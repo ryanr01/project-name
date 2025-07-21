@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "sdkconfig.h"
 #include "driver/i2c_master.h"
 #include "esp_log.h"
 #include "vl53l0x.h"
