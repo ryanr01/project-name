@@ -2,9 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "esp_log.h"
+#include "esp_check.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "sdkconfig.h"
+
+static const char *TAG = "VL53L0X";
 
 static esp_err_t write_reg(i2c_master_dev_handle_t dev, uint16_t reg, uint8_t val)
 {
@@ -60,8 +63,18 @@ esp_err_t vl53l0x_init(i2c_master_dev_handle_t dev)
         }
     }
 
-    // start continuous ranging
-    return write_reg(dev, 0x000, 0x01);
+    // ST data init sequence to release device from reset
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0x80, 0x01), TAG, "init stage 1");
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0xFF, 0x01), TAG, "init stage 1");
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0x00, 0x00), TAG, "init stage 1");
+    uint8_t stop_var = 0;
+    ESP_RETURN_ON_ERROR(read_reg(dev, 0x91, &stop_var), TAG, "read stop_var");
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0x00, 0x01), TAG, "init stage 1");
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0xFF, 0x00), TAG, "init stage 1");
+    ESP_RETURN_ON_ERROR(write_reg(dev, 0x80, 0x00), TAG, "init stage 1");
+
+    // start continuous ranging in back-to-back mode
+    return write_reg(dev, 0x000, 0x02);
 }
 
 int vl53l0x_read_range_mm(i2c_master_dev_handle_t dev)
