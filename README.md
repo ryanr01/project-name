@@ -49,4 +49,5 @@ idf.py build
 idf.py flash
 ```
 
-After reset, the application continuously prints the measured distance to the serial console.
+After reset, the application configures the VL53L0X sensor for back-to-back
+continuous measurements and prints the measured distance to the serial console.
